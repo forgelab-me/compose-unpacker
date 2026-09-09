@@ -1,0 +1,46 @@
+name: Build and push compose-unpacker image
+
+on:
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Tag to publish the image as (ghcr.io/<owner>/compose-unpacker:<tag>)"
+        required: true
+        default: compose-v5-migration
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Set up Go
+        uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+
+      - name: Build binary
+        run: make PLATFORM=linux ARCH=amd64 binary
+
+      - name: Log in to GHCR
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Build and push image
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: build/linux/Dockerfile
+          push: true
+          build-args: |
+            GIT_COMMIT=${{ github.sha }}
+            BUILD_DATE=${{ github.event.repository.updated_at }}
+          tags: ghcr.io/${{ github.repository_owner }}/compose-unpacker:${{ inputs.image_tag }}
