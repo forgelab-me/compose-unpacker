@@ -2,7 +2,7 @@ module github.com/portainer/compose-unpacker
 
 go 1.26.6
 
-replace github.com/portainer/portainer => github.com/xeys/portainer v0.6.1-0.20260909145459-790a1521ef29
+replace github.com/portainer/portainer => github.com/forgelab-me/portainer v0.0.0-20260909145459-790a1521ef29
 
 require (
 	github.com/alecthomas/kong v1.16.0
